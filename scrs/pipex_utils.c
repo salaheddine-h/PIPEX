@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   pipex_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: salhali <salhali@student.1337.ma>          +#+  +:+       +#+        */
+/*   By: salhali <salhali@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/28 19:46:51 by salhali           #+#    #+#             */
-/*   Updated: 2024/12/31 21:27:36 by salhali          ###   ########.fr       */
+/*   Created: 2025/01/14 15:44:40 by salhali           #+#    #+#             */
+/*   Updated: 2025/01/15 18:53:59 by salhali          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+/* Function that will look for the path line inside the environment, will
+ split and test each command path and then return the right one. */
 char	*find_path(char *cmd, char **envp)
 {
 	char	**paths;
@@ -41,33 +43,59 @@ char	*find_path(char *cmd, char **envp)
 	return (0);
 }
 
+/* A simple error displaying function. */
 void	error(void)
 {
-	perror("Error");
+	perror("\033[31mError");
 	exit(EXIT_FAILURE);
 }
 
-void	execute(char *argv, char **env)
+/* Function that take the command and send it to find_path
+ before executing it. */
+void	execute(char *argv, char **envp)
 {
 	char	**cmd;
-	int		i;
+	int 	i;
 	char	*path;
-
+	
 	i = -1;
 	cmd = ft_split(argv, ' ');
-	path = find_path(cmd[0], env);
-	if (!path)
+	path = find_path(cmd[0], envp);
+	if (!path)	
 	{
 		while (cmd[++i])
 			free(cmd[i]);
 		free(cmd);
 		error();
 	}
-	if (execve(path, cmd, env) == -1)
-	{
-		while (cmd[++i])
-			free(cmd[i]);
-		free(cmd);
+	if (execve(path, cmd, envp) == -1)
 		error();
+}
+
+/* Function that will read input from the terminal and return line. */
+int	get_next_line(char **line)
+{
+	char	*buffer;
+	int		i;
+	int		r;
+	char	c;
+
+	i = 0;
+	r = 0;
+	buffer = (char *)malloc(10000);
+	if (!buffer)
+		return (-1);
+	r = read(0, &c, 1);
+	while (r && c != '\n' && c != '\0')
+	{
+		if (c != '\n' && c != '\0')
+			buffer[i] = c;
+		i++;
+		r = read(0, &c, 1);
 	}
+	buffer[i] = '\n';
+	buffer[++i] = '\0';
+	*line = buffer;
+	free(buffer);
+	return (r);
 }

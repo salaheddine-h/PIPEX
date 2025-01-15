@@ -3,26 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: salhali <salhali@student.1337.ma>          +#+  +:+       +#+        */
+/*   By: salhali <salhali@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/28 19:43:19 by salhali           #+#    #+#             */
-/*   Updated: 2024/12/31 21:23:47 by salhali          ###   ########.fr       */
+/*   Created: 2025/01/14 13:20:16 by salhali           #+#    #+#             */
+/*   Updated: 2025/01/15 19:31:26 by salhali          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
-# define PIPEX_H
+#define PIPEX_H
 
-# include "libft/libft.h"
-# include <stdlib.h>
-# include <sys/types.h>
-# include <sys/wait.h>
-# include <unistd.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include "../libft/libft.h"
+#include <sys/types.h>    //NOTE: Added
 
-void	error(void);
-void	child_proc(char **argv, char **env, int *fd);
-void	parent_proc(char **argv, char **env, int *fd);
-void	execute(char *argv, char **env);
-char	*find_path(char *cmd, char **envp);
+
+// Mandatory Funtions
+
+void    error(void); //here
+char    *find_path(char *cmd, char **envp); //here
+int     get_next_line(char **line); //here
+void    execute(char *argv, char **envp);//here
 
 #endif
