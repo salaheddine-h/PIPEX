@@ -5,15 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: salhali <salhali@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/14 15:44:40 by salhali           #+#    #+#             */
-/*   Updated: 2025/01/15 18:53:59 by salhali          ###   ########.fr       */
+/*   Created: 2025/01/19 18:24:01 by salhali           #+#    #+#             */
+/*   Updated: 2025/01/21 17:39:32 by salhali          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-/* Function that will look for the path line inside the environment, will
- split and test each command path and then return the right one. */
 char	*find_path(char *cmd, char **envp)
 {
 	char	**paths;
@@ -22,8 +20,11 @@ char	*find_path(char *cmd, char **envp)
 	char	*part_path;
 
 	i = 0;
-	while (ft_strnstr(envp[i], "PATH", 4) == 0)
+	while (envp[i] && ft_strnstr(envp[i], "PATH", 4) == 0)
 		i++;
+
+	if (!envp[i])
+		return 0;
 	paths = ft_split(envp[i] + 5, ':');
 	i = 0;
 	while (paths[i])
@@ -42,16 +43,13 @@ char	*find_path(char *cmd, char **envp)
 	free(paths);
 	return (0);
 }
-
-/* A simple error displaying function. */
-void	error(void)
+void	error(const char *str)
 {
-	perror("\033[31mError");
+	if(str)
+		perror(str);
 	exit(EXIT_FAILURE);
 }
 
-/* Function that take the command and send it to find_path
- before executing it. */
 void	execute(char *argv, char **envp)
 {
 	char	**cmd;
@@ -66,13 +64,12 @@ void	execute(char *argv, char **envp)
 		while (cmd[++i])
 			free(cmd[i]);
 		free(cmd);
-		error();
+		error("");
 	}
 	if (execve(path, cmd, envp) == -1)
-		error();
+		error("");
 }
 
-/* Function that will read input from the terminal and return line. */
 int	get_next_line(char **line)
 {
 	char	*buffer;

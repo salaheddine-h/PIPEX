@@ -1,30 +1,39 @@
-
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: salhali <salhali@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/01/19 18:30:46 by salhali           #+#    #+#              #
+#    Updated: 2025/01/21 17:44:57 by salhali          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
 NAME = pipex
 
 CC = cc
 
-RM = rm -rf 
+RM = rm -rf
 
 CFLAGS = -Wall -Wextra -Werror 
 
-SRC = scrs/pipex.c scrs/pipex_utils.c libft/libft.a
+SRC = source/pipex.c source/pipex_utils.c libft/libft.a
 
 OBJ = $(SRC:.c=.o)
 
 all : $(NAME)
 
-$(NAME) : 
+$(NAME) :
 	make all -C libft
-	gcc $(CFLAGS) $(SRC) -o $(NAME)
+	$(CC) $(CFLAGS) $(SRC) -o $(NAME)
 
 fclean : clean
-	$(RM) $(NAME)
 	make fclean -C libft
-
-clean : 
 	$(RM) $(NAME)
+	
+clean : 
 	make clean -C libft
+	$(RM) $(NAME)
 
 re : fclean all 
-
