@@ -6,69 +6,80 @@
 /*   By: salhali <salhali@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/18 16:09:43 by salhali           #+#    #+#             */
-/*   Updated: 2025/01/21 17:47:40 by salhali          ###   ########.fr       */
+/*   Updated: 2025/01/26 19:01:44 by salhali          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void    parent_process(char **argv, char **envp, int *fd)
-{
-    int fileout;
-
-    fileout = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-    if(fileout == -1)
-            error("Check");
-    dup2(fd[0], STDIN_FILENO);
-    dup2(fileout, STDOUT_FILENO);
-    close(fd[1]);
-	execute(argv[3], envp);
-    
-}
-void    child_process(char **argv, char **envp, int *fd)
+void    child_process1(char **argv, char **envp, int *fd)
 {
     int filein;
 
     filein = open(argv[1], O_RDONLY);
     if(filein == -1)
-            error("Check");
-    dup2(fd[1], STDOUT_FILENO);
-    dup2(filein, STDIN_FILENO);
+    {
+        perror("Pipex: open(child_process1)");
+        exit(EXIT_FAILURE);
+    }
+    
+    dup2(filein, STDIN_FILENO); //Redirect stdin mn filein 
+    dup2(fd[1], STDOUT_FILENO); //Redirect stdout mn pipe 
+    close(filein);
     close(fd[0]);
+    close(fd[1]);
 	execute(argv[2], envp);
+}
+
+void    child_process2(char **argv, char **envp, int *fd)
+{
+    int fileout;
+
+    fileout = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+    if(fileout == -1)
+    {
+            perror("Pipex: open(child_proess2)");
+            exit(EXIT_FAILURE);
+    }
+    
+    dup2(fd[0], STDIN_FILENO);
+    dup2(fileout, STDOUT_FILENO);
+    close(fileout);
+    close(fd[0]);
+    close(fd[1]);
+	execute(argv[3], envp);
 }
 
 int main(int argc, char **argv,  char **env)
 {
     int     pid_fd[2];
-    pid_t   pid;
-    //s_name Name;
+    pid_t   pid1, pid2;
 
-    
-    //name-> input_inpyt , file->output
-    // s_name.input_file = argv[1];
-    // s_name.output_file = argv[4];
-    
-    // t_name.input_fd = 
-    // t_name.input_fd = 
-
-    if(argc == 5)
-    {
-        if(pipe(pid_fd) == -1)
-            perror("Check");
-        pid = fork();
-        if(pid == -1)
-            perror("Check");
-        if(pid == 0)
-            child_process(argv, env, pid_fd);
-        parent_process(argv, env, pid_fd); 
-    }
-    else
+    if(argc != 5)
     {
         ft_putstr_fd("ERROR : Bad arguments\n", 2);
         ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <file2>\n", 1);
-	ft_putstr_fd("\n---------- Check Again ----------\n", 1);
-		exit(EXIT_FAILURE);
+    	exit(EXIT_FAILURE);
     }
+    if(pipe(pid_fd) == -1) // parent process creates the pipe hadi blaan and fork to child 
+         perror("Pipex: pipe");
+    pid1 = fork(); //one fork
+    if (pid1 == -1)
+            perror("Pipex: fork");
+    if (pid1 == 0)
+            child_process1(argv, env, pid_fd);
+
+    pid2 = fork(); // tow fork
+    if( pid2 == -1)
+        perror("Pipex: fork");
+    if (pid2 == 0)
+        child_process2(argv, env, pid_fd);
+
+    close(pid_fd[0]);
+    close(pid_fd[1]);
+    
+    waitpid(pid1, NULL, 0);
+    waitpid(pid2, NULL, 0);
+    
     return(0);
 }
