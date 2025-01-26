@@ -24,7 +24,7 @@
 
 void	child_process1(char **argv, char **envp, int *fd);
 void	child_process2(char **argv, char **envp, int *fd);
-void	execute(char *argv, char **envp);
+void	execute(char *cmd, char **env);
 char	*find_path(char *cmd, char **envp);
 void	ft_free(char **str);
 

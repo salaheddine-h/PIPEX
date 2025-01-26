@@ -61,17 +61,17 @@ int main(int argc, char **argv,  char **env)
         ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <file2>\n", 1);
     	exit(EXIT_FAILURE);
     }
-    if(pipe(pid_fd) == -1) // parent process creates the pipe hadi blaan and fork to child 
-         perror("Pipex: pipe");
+    if(pipe(pid_fd) == -1)   
+     	    perror("Pipex: pipe");
     pid1 = fork(); //one fork
     if (pid1 == -1)
-            perror("Pipex: fork");
+    	perror("Pipex: fork_process1");
     if (pid1 == 0)
             child_process1(argv, env, pid_fd);
 
     pid2 = fork(); // tow fork
     if( pid2 == -1)
-        perror("Pipex: fork");
+        perror("Pipex: fork_process2");
     if (pid2 == 0)
         child_process2(argv, env, pid_fd);
 

@@ -31,26 +31,15 @@ char	*find_path(char *cmd, char **envp)
 
 	paths = ft_split(envp[i] + 5, ':');
 	
-	//paths = 
-	//*paths[0]: /usr/local/sbin/ls
-	//*paths[1]: /usr/local/bin/ls
-	//*paths[2]: /usr/sbin/ls
-	//*paths[3]: /usr/bin/ls
-	//*paths[4]: /sbin/ls
-	//*paths[5]: /bin/ls
-	//*paths[6]: /usr/games/ls
-	//*paths[7]: /usr/local/games/ls
-	//*paths[8]: /snap/bin/ls 
-	
 	i = 0;
 	while (paths[i])
 	{
 		part_path = ft_strjoin(paths[i], "/");
 		path = ft_strjoin(part_path, cmd);
 		free(part_path);
-		if (access(path, F_OK) == 0) // check is this cmd file is here or not 
-			return (path); //valid
-		free(path); //not valid
+		if (access(path, F_OK) == 0) 
+			return (path); 
+		free(path); 
 		i++;
 	}
 	i = -1;
@@ -72,29 +61,39 @@ void ft_free(char **str)
 	free(str);
 }
 
-void	execute(char *argv, char **envp)
+void	execute(char *cmd, char **env)
 {
-	char	**cmd;
-	char	*path;
-	
-	cmd = ft_split(argv, ' ');
-	if (NULL == cmd)
-	{
-		ft_putstr_fd("Pipex: malloc failed in ft_split", 2);
-		exit(EXIT_FAILURE);
-	}
-	path = find_path(cmd[0], envp);
-	if (!path)	
-	{
-		ft_free(cmd);
-		exit(1);
-	}
-	if (execve(path, cmd, NULL) == -1)
-	{
-		perror("Pipex: execve");
-		ft_free(cmd);
-		free(path);
-		exit (EXIT_FAILURE);		
-	}
-}
+    char *path;
 
+    // Absolute path check
+    if (cmd[0] == '/')
+    {
+        // Hna absolute path, nrun direct
+        if (execve(cmd, ft_split(cmd, ' '), env) == -1)
+        {
+            perror("Pipex: execve (absolute path)");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        // Use find_path to locate the relative path
+        path = find_path(cmd, env);
+
+        if (path == NULL) // If find_path returns NULL, the command is not found
+        {
+            perror("Pipex: command not found");
+            exit(EXIT_FAILURE);
+        }
+
+        // Execute the found path
+        if (execve(path, ft_split(cmd, ' '), env) == -1)
+        {
+            perror("Pipex: execve (relative path)");
+            free(path); // Free path if execve fails
+            exit(EXIT_FAILURE);
+        }
+
+        free(path); // Cleanup memory allocated by find_path
+    }
+}
