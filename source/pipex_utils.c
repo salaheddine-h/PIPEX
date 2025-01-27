@@ -42,10 +42,7 @@ char	*find_path(char *cmd, char **envp)
 		free(path); 
 		i++;
 	}
-	i = -1;
-	while (paths[++i])
-		free(paths[i]);
-	free(paths);
+	ft_free(paths);
 	return (0);
 }
 void ft_free(char **str)
@@ -60,40 +57,55 @@ void ft_free(char **str)
 	}
 	free(str);
 }
-
 void	execute(char *cmd, char **env)
 {
     char *path;
+	char **cmd_args;
 
-    // Absolute path check
-    if (cmd[0] == '/')
+	if (cmd[0] == '\0')
+	{
+		write(2, "Pipex: \"========\" command not found\n", 37);
+		exit(EXIT_FAILURE);
+	}
+	cmd_args = ft_split(cmd, ' ');
+	if (NULL == cmd_args)
+	{
+		perror("Pipex: ft_split:");
+		exit (EXIT_FAILURE);
+	}
+
+    if (ft_strchr(cmd_args[0], '/')) // we check realtive and absolute path at the same time (ex: ./program || /usr/bin/ls)
     {
-        // Hna absolute path, nrun direct
-        if (execve(cmd, ft_split(cmd, ' '), env) == -1)
-        {
-            perror("Pipex: execve (absolute path)");
-            exit(EXIT_FAILURE);
-        }
+		if (access(cmd_args[0], X_OK) == 0)
+			execve(cmd_args[0], cmd_args, env);
+		else
+		{
+			perror("Pipex: ");
+			ft_free(cmd_args);
+			exit(EXIT_FAILURE);
+		}
     }
-    else
+
+    else // the user passe the command only, so we have to search for its path! (ex: ls -la)
     {
         // Use find_path to locate the relative path
-        path = find_path(cmd, env);
-
+        path = find_path(cmd_args[0], env);
         if (path == NULL) // If find_path returns NULL, the command is not found
         {
-            perror("Pipex: command not found");
+            write(2, "Pipex: +++++++ command not found", 33);
+			ft_free(cmd_args);
             exit(EXIT_FAILURE);
         }
 
         // Execute the found path
-        if (execve(path, ft_split(cmd, ' '), env) == -1)
+        if (execve(path, cmd_args, env) == -1)
         {
             perror("Pipex: execve (relative path)");
+			ft_free(cmd_args);
             free(path); // Free path if execve fails
             exit(EXIT_FAILURE);
         }
 
-        free(path); // Cleanup memory allocated by find_path
+        // frwee(path); // Cleanup memory allocated by find_path
     }
 }

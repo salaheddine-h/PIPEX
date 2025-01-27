@@ -18,4 +18,6 @@ int	ft_isalnum(int arg)
 		return (1);
 	else
 		return (0);
+
+		
 }

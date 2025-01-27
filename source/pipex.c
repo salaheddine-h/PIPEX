@@ -55,6 +55,8 @@ int main(int argc, char **argv,  char **env)
     int     pid_fd[2];
     pid_t   pid1, pid2;
 
+
+
     if(argc != 5)
     {
         ft_putstr_fd("ERROR : Bad arguments\n", 2);
